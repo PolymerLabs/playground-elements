@@ -21,6 +21,7 @@
 /src/themes/
 /src/_codemirror/codemirror-styles.ts
 /src/configurator/themes.ts
+/src/lib/shoelace-base-theme.ts
 .tsbuildinfo
 /playground-service-worker.*
 /playground-service-worker-proxy.*
