@@ -18,9 +18,7 @@ import '@shoelace-style/shoelace/dist/components/menu/menu.js';
 import '@shoelace-style/shoelace/dist/components/menu-item/menu-item.js';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
 import '@shoelace-style/shoelace/dist/components/input/input.js';
-import '@material/mwc-menu/mwc-menu-surface.js';
 
-import {MenuSurface} from '@material/mwc-menu/mwc-menu-surface.js';
 import type SlInput from '@shoelace-style/shoelace/dist/components/input/input.js';
 import type SlButton from '@shoelace-style/shoelace/dist/components/button/button.js';
 import type SlMenu from '@shoelace-style/shoelace/dist/components/menu/menu.js';
@@ -38,23 +36,23 @@ export class PlaygroundFileSystemControls extends PlaygroundConnectedElement {
   static styles = [
     shoelaceBaseTheme,
     css`
-      mwc-menu-surface {
-        --mdc-theme-primary: var(
-          var(
-            --playground-floating-controls-color,
-            var(--playground-highlight-color, #6200ee)
-          )
-        );
+      :host([state='closed']) {
+        display: none;
       }
 
-      mwc-menu-surface.menu {
-        --mdc-typography-subtitle1-font-size: 13px;
-        --mdc-list-item-graphic-margin: 14px;
+      :host {
+        background: white;
+        position: fixed;
+        width: min-content;
+        z-index: 8;
+        box-shadow: rgb(0 0 0 / 20%) 0px 5px 5px -3px,
+          rgb(0 0 0 / 14%) 0px 8px 10px 1px, rgb(0 0 0 / 12%) 0px 3px 14px 2px;
+        border-radius: 3px;
       }
 
-      mwc-menu-surface.rename > .wrapper,
-      mwc-menu-surface.newfile > .wrapper {
-        padding: 18px;
+      :host([state='rename']),
+      :host([state='newfile']) {
+        padding: 20px;
       }
 
       sl-input {
@@ -77,7 +75,7 @@ export class PlaygroundFileSystemControls extends PlaygroundConnectedElement {
    * -  rename: Control for renaming an existing file.
    * - newfile: Control for creating a new file.
    */
-  @property()
+  @property({reflect: true})
   state: 'closed' | 'menu' | 'rename' | 'newfile' = 'closed';
 
   /**
@@ -85,9 +83,6 @@ export class PlaygroundFileSystemControls extends PlaygroundConnectedElement {
    */
   @property()
   filename?: string;
-
-  @query('mwc-menu-surface')
-  private _surface!: MenuSurface;
 
   @query('.menu-list')
   private _menuList?: SlMenu;
@@ -111,24 +106,39 @@ export class PlaygroundFileSystemControls extends PlaygroundConnectedElement {
   }
 
   render() {
-    return html`<mwc-menu-surface
-      fixed
-      quick
-      .open=${this.state !== 'closed'}
-      .anchor=${this.anchorElement}
-      corner="BOTTOM_START"
-      .classList=${this.state}
-      @closed=${this._onSurfaceClosed}
-      ><div class="wrapper">${this._surfaceContents}</div></mwc-menu-surface
-    >`;
+    switch (this.state) {
+      case 'closed':
+        return nothing;
+      case 'menu':
+        return this._menu;
+      case 'rename':
+        return this._rename;
+      case 'newfile':
+        return this._newFile;
+    }
   }
 
   async updated() {
     if (this._postStateChangeRenderDone) {
       return;
     }
+    // Close when anything clicked outside of this component.
+    window.removeEventListener('click', this._onClickWindow);
+    if (this.state === 'closed') {
+      return;
+    }
+    window.addEventListener('click', this._onClickWindow);
+
+    // Anchor below the anchor element.
+    const anchorRect = this.anchorElement?.getBoundingClientRect();
+    if (anchorRect) {
+      this.style.left = `${anchorRect.left}px`;
+      this.style.top = `${anchorRect.top + anchorRect.height}px`;
+    }
+
+    // Set focus after open.
     if (this.state === 'menu') {
-      // Focus the first item  so that keyboard controls work.
+      // Focus the first item so that keyboard controls work.
       const menuList = this._menuList;
       if (menuList) {
         await menuList.updateComplete;
@@ -150,18 +160,11 @@ export class PlaygroundFileSystemControls extends PlaygroundConnectedElement {
     this._postStateChangeRenderDone = true;
   }
 
-  private get _surfaceContents() {
-    switch (this.state) {
-      case 'closed':
-        return nothing;
-      case 'menu':
-        return this._menu;
-      case 'rename':
-        return this._rename;
-      case 'newfile':
-        return this._newFile;
+  private _onClickWindow = (event: MouseEvent) => {
+    if (!event.composedPath().includes(this)) {
+      this._close();
     }
-  }
+  };
 
   private get _menu() {
     return html`
@@ -242,12 +245,12 @@ export class PlaygroundFileSystemControls extends PlaygroundConnectedElement {
     `;
   }
 
-  private _onSurfaceClosed() {
+  private _close() {
     this.state = 'closed';
   }
 
   private _onClickCancel() {
-    this._surface.close();
+    this._close();
   }
 
   private _onMenuSelect(event: CustomEvent<{item: SlMenuItem}>) {
@@ -264,7 +267,7 @@ export class PlaygroundFileSystemControls extends PlaygroundConnectedElement {
   }
 
   private _onMenuSelectDelete() {
-    this._surface.close();
+    this._close();
     if (this._project && this.filename) {
       this._project.deleteFile(this.filename);
     }
@@ -294,7 +297,7 @@ export class PlaygroundFileSystemControls extends PlaygroundConnectedElement {
   }
 
   private _onSubmitRename() {
-    this._surface.close();
+    this._close();
     const oldFilename = this.filename;
     const newFilename = this._filenameInput?.value;
     if (this._project && oldFilename && newFilename) {
@@ -303,7 +306,7 @@ export class PlaygroundFileSystemControls extends PlaygroundConnectedElement {
   }
 
   private _onSubmitNewFile() {
-    this._surface.close();
+    this._close();
     const filename = this._filenameInput?.value;
     if (this._project && filename) {
       this._project.addFile(filename);

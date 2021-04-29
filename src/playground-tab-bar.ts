@@ -230,6 +230,8 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
   }
 
   private _onClickAddFile(event: Event) {
+    // Don't trigger the menu's close-on-click-outside handler.
+    event.stopPropagation();
     const controls = this._fileSystemControls;
     if (!controls) {
       return;
@@ -372,6 +374,8 @@ class PlaygroundTab extends Tab {
   }
 
   private _onClickMenuButton(event: Event) {
+    // Don't trigger the menu's close-on-click-outside handler.
+    event.stopPropagation();
     this.dispatchEvent(
       new CustomEvent<{index: number; anchor: HTMLElement}>('openMenu', {
         composed: true,
