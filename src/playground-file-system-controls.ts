@@ -14,11 +14,8 @@ import {
 } from 'lit-element';
 import {nothing} from 'lit-html';
 
-// Note despite usual best practices, we should _not_ import
-// @material/mwc-list-item directly, because @material/mwc-list already imports
-// it, and this causes a duplicate registration error on unpkg.com because of
-// redirects.
-import '@material/mwc-list';
+import '@shoelace-style/shoelace/dist/components/menu/menu.js';
+import '@shoelace-style/shoelace/dist/components/menu-item/menu-item.js';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
 import '@shoelace-style/shoelace/dist/components/input/input.js';
 import '@material/mwc-menu/mwc-menu-surface.js';
@@ -26,7 +23,8 @@ import '@material/mwc-menu/mwc-menu-surface.js';
 import {MenuSurface} from '@material/mwc-menu/mwc-menu-surface.js';
 import type SlInput from '@shoelace-style/shoelace/dist/components/input/input.js';
 import type SlButton from '@shoelace-style/shoelace/dist/components/button/button.js';
-import {List} from '@material/mwc-list';
+import type SlMenu from '@shoelace-style/shoelace/dist/components/menu/menu.js';
+import type SlMenuItem from '@shoelace-style/shoelace/dist/components/menu-item/menu-item.js';
 
 import {PlaygroundConnectedElement} from './playground-connected-element.js';
 import {shoelaceBaseTheme} from './lib/shoelace-base-theme.js';
@@ -54,25 +52,11 @@ export class PlaygroundFileSystemControls extends PlaygroundConnectedElement {
         --mdc-list-item-graphic-margin: 14px;
       }
 
-      mwc-list-item {
-        min-width: 100px;
-        height: 40px;
-      }
-
       mwc-menu-surface.rename > .wrapper,
       mwc-menu-surface.newfile > .wrapper {
         padding: 18px;
       }
 
-      .actions {
-        margin-top: 18px;
-        display: flex;
-        justify-content: flex-end;
-      }
-
-      .actions > * {
-        margin-left: 12px;
-      }
       sl-input {
         margin-bottom: 20px;
       }
@@ -106,7 +90,10 @@ export class PlaygroundFileSystemControls extends PlaygroundConnectedElement {
   private _surface!: MenuSurface;
 
   @query('.menu-list')
-  private _menuList?: List;
+  private _menuList?: SlMenu;
+
+  @query('sl-menu-item:first-of-type')
+  private _firstMenuItem?: SlMenuItem;
 
   @query('.filename-input')
   private _filenameInput?: SlInput;
@@ -145,7 +132,7 @@ export class PlaygroundFileSystemControls extends PlaygroundConnectedElement {
       const menuList = this._menuList;
       if (menuList) {
         await menuList.updateComplete;
-        menuList.focusItemAtIndex(0);
+        this._firstMenuItem?.focus();
       }
     } else if (this.state === 'rename' || this.state === 'newfile') {
       // Focus the filename input.
@@ -178,36 +165,37 @@ export class PlaygroundFileSystemControls extends PlaygroundConnectedElement {
 
   private get _menu() {
     return html`
-      <mwc-list class="menu-list" @action=${this._onMenuAction}>
-        <mwc-list-item graphic="icon">
+      <sl-menu class="menu-list" @sl-select=${this._onMenuSelect}>
+        <sl-menu-item value="rename">
           Rename
           <svg
-            slot="graphic"
-            height="24"
+            slot="prefix"
             viewBox="0 0 24 24"
-            width="24"
+            height="18"
+            width="18"
             fill="currentcolor"
           >
             <path
               d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"
             />
           </svg>
-        </mwc-list-item>
-        <mwc-list-item graphic="icon">
+        </sl-menu-item>
+        <sl-menu-item value="delete">
           Delete
           <svg
-            slot="graphic"
-            width="24"
-            height="24"
+            slot="prefix"
             viewBox="0 0 24 24"
+            width="18"
+            height="18"
             fill="currentcolor"
+            shape-rendering="crispEdges"
           >
             <path
               d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"
             />
           </svg>
-        </mwc-list-item>
-      </mwc-list>
+        </sl-menu-item>
+      </sl-menu>
     `;
   }
 
@@ -262,11 +250,11 @@ export class PlaygroundFileSystemControls extends PlaygroundConnectedElement {
     this._surface.close();
   }
 
-  private _onMenuAction(event: CustomEvent<{index: number}>) {
-    switch (event.detail.index) {
-      case 0:
+  private _onMenuSelect(event: CustomEvent<{item: SlMenuItem}>) {
+    switch (event.detail.item.value) {
+      case 'rename':
         return this._onMenuSelectRename();
-      case 1:
+      case 'delete':
         return this._onMenuSelectDelete();
     }
   }
