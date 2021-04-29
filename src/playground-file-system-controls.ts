@@ -20,11 +20,11 @@ import {nothing} from 'lit-html';
 // redirects.
 import '@material/mwc-list';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
-import '@material/mwc-textfield';
+import '@shoelace-style/shoelace/dist/components/input/input.js';
 import '@material/mwc-menu/mwc-menu-surface.js';
 
 import {MenuSurface} from '@material/mwc-menu/mwc-menu-surface.js';
-import {TextField} from '@material/mwc-textfield';
+import type SlInput from '@shoelace-style/shoelace/dist/components/input/input.js';
 import type SlButton from '@shoelace-style/shoelace/dist/components/button/button.js';
 import {List} from '@material/mwc-list';
 
@@ -73,6 +73,9 @@ export class PlaygroundFileSystemControls extends PlaygroundConnectedElement {
       .actions > * {
         margin-left: 12px;
       }
+      sl-input {
+        margin-bottom: 20px;
+      }
     `,
   ];
 
@@ -106,7 +109,7 @@ export class PlaygroundFileSystemControls extends PlaygroundConnectedElement {
   private _menuList?: List;
 
   @query('.filename-input')
-  private _filenameInput?: TextField;
+  private _filenameInput?: SlInput;
 
   @query('.submit-button')
   private _submitButton?: SlButton;
@@ -210,13 +213,13 @@ export class PlaygroundFileSystemControls extends PlaygroundConnectedElement {
 
   private get _rename() {
     return html`
-      <mwc-textfield
+      <sl-input
         class="filename-input"
         label="Filename"
         .value=${this.filename || ''}
         @input=${this._onFilenameInputChange}
         @keydown=${this._onFilenameInputKeydown}
-      ></mwc-textfield>
+      ></sl-input>
       <div class="actions">
         <sl-button outlined @click=${this._onClickCancel}>Cancel</sl-button>
         <sl-button
@@ -232,12 +235,12 @@ export class PlaygroundFileSystemControls extends PlaygroundConnectedElement {
 
   private get _newFile() {
     return html`
-      <mwc-textfield
+      <sl-input
         class="filename-input"
         label="Filename"
         @input=${this._onFilenameInputChange}
         @keydown=${this._onFilenameInputKeydown}
-      ></mwc-textfield>
+      ></sl-input>
       <div class="actions">
         <sl-button outlined @click=${this._onClickCancel}>Cancel</sl-button>
         <sl-button
