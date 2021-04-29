@@ -19,16 +19,17 @@ import {nothing} from 'lit-html';
 // it, and this causes a duplicate registration error on unpkg.com because of
 // redirects.
 import '@material/mwc-list';
-import '@material/mwc-button';
+import '@shoelace-style/shoelace/dist/components/button/button.js';
 import '@material/mwc-textfield';
 import '@material/mwc-menu/mwc-menu-surface.js';
 
 import {MenuSurface} from '@material/mwc-menu/mwc-menu-surface.js';
 import {TextField} from '@material/mwc-textfield';
+import type SlButton from '@shoelace-style/shoelace/dist/components/button/button.js';
 import {List} from '@material/mwc-list';
-import {Button} from '@material/mwc-button';
 
 import {PlaygroundConnectedElement} from './playground-connected-element.js';
+import {shoelaceBaseTheme} from './lib/shoelace-base-theme.js';
 
 /**
  * Floating controls for creating, deleting, and renaming files in playground
@@ -36,41 +37,44 @@ import {PlaygroundConnectedElement} from './playground-connected-element.js';
  */
 @customElement('playground-file-system-controls')
 export class PlaygroundFileSystemControls extends PlaygroundConnectedElement {
-  static styles = css`
-    mwc-menu-surface {
-      --mdc-theme-primary: var(
-        var(
-          --playground-floating-controls-color,
-          var(--playground-highlight-color, #6200ee)
-        )
-      );
-    }
+  static styles = [
+    shoelaceBaseTheme,
+    css`
+      mwc-menu-surface {
+        --mdc-theme-primary: var(
+          var(
+            --playground-floating-controls-color,
+            var(--playground-highlight-color, #6200ee)
+          )
+        );
+      }
 
-    mwc-menu-surface.menu {
-      --mdc-typography-subtitle1-font-size: 13px;
-      --mdc-list-item-graphic-margin: 14px;
-    }
+      mwc-menu-surface.menu {
+        --mdc-typography-subtitle1-font-size: 13px;
+        --mdc-list-item-graphic-margin: 14px;
+      }
 
-    mwc-list-item {
-      min-width: 100px;
-      height: 40px;
-    }
+      mwc-list-item {
+        min-width: 100px;
+        height: 40px;
+      }
 
-    mwc-menu-surface.rename > .wrapper,
-    mwc-menu-surface.newfile > .wrapper {
-      padding: 18px;
-    }
+      mwc-menu-surface.rename > .wrapper,
+      mwc-menu-surface.newfile > .wrapper {
+        padding: 18px;
+      }
 
-    .actions {
-      margin-top: 18px;
-      display: flex;
-      justify-content: flex-end;
-    }
+      .actions {
+        margin-top: 18px;
+        display: flex;
+        justify-content: flex-end;
+      }
 
-    .actions > * {
-      margin-left: 12px;
-    }
-  `;
+      .actions > * {
+        margin-left: 12px;
+      }
+    `,
+  ];
 
   /**
    * The element that these controls will be positioned adjacent to.
@@ -105,7 +109,7 @@ export class PlaygroundFileSystemControls extends PlaygroundConnectedElement {
   private _filenameInput?: TextField;
 
   @query('.submit-button')
-  private _submitButton?: Button;
+  private _submitButton?: SlButton;
 
   private _postStateChangeRenderDone = false;
 
@@ -214,13 +218,13 @@ export class PlaygroundFileSystemControls extends PlaygroundConnectedElement {
         @keydown=${this._onFilenameInputKeydown}
       ></mwc-textfield>
       <div class="actions">
-        <mwc-button outlined @click=${this._onClickCancel}>Cancel</mwc-button>
-        <mwc-button
-          raised
+        <sl-button outlined @click=${this._onClickCancel}>Cancel</sl-button>
+        <sl-button
+          type="primary"
           class="submit-button"
           .disabled=${!this._filenameInputValid}
           @click=${this._onSubmitRename}
-          >Rename</mwc-button
+          >Rename</sl-button
         >
       </div>
     `;
@@ -235,13 +239,13 @@ export class PlaygroundFileSystemControls extends PlaygroundConnectedElement {
         @keydown=${this._onFilenameInputKeydown}
       ></mwc-textfield>
       <div class="actions">
-        <mwc-button outlined @click=${this._onClickCancel}>Cancel</mwc-button>
-        <mwc-button
-          raised
+        <sl-button outlined @click=${this._onClickCancel}>Cancel</sl-button>
+        <sl-button
+          type="primary"
           class="submit-button"
           .disabled=${!this._filenameInputValid}
           @click=${this._onSubmitNewFile}
-          >Create</mwc-button
+          >Create</sl-button
         >
       </div>
     `;
