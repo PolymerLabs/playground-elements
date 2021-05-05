@@ -45,7 +45,7 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
         background: var(--playground-tab-bar-background, #eaeaea);
         flex-direction: row;
         align-items: center;
-        --mdc-theme-primary: var(--playground-highlight-color, #6200ee);
+        --sl-color-primary-500: var(--playground-highlight-color, #6200ee);
       }
 
       mwc-tab-bar {
@@ -53,13 +53,10 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
           --playground-tab-bar-foreground-color,
           #000
         );
-        --mdc-typography-button-text-transform: none;
-        --mdc-typography-button-font-weight: normal;
         --mdc-typography-button-font-size: var(
           --playground-tab-bar-font-size,
           0.85em
         );
-        --mdc-typography-button-letter-spacing: normal;
       }
 
       mwc-icon-button {
@@ -71,6 +68,11 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
       sl-tab,
       sl-tab::part(base) {
         height: var(--playground-bar-height, 40px);
+      }
+
+      sl-tab-group::part(active-tab-indicator) {
+        /* By default this is 2px below the tab, so it's hidden by the editor. */
+        bottom: 1px;
       }
 
       .add-file-button {
@@ -195,7 +197,10 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
             >
               <!-- Source: https://material.io/resources/icons/?icon=add&style=baseline -->
               <svg fill="currentcolor">
-                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+                <path
+                  d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"
+                  shape-rendering="crispEdges"
+                />
               </svg>
             </mwc-icon-button>
 
