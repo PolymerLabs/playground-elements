@@ -746,7 +746,7 @@ const validateImportMap = (importMap: unknown): string[] => {
       );
     }
     try {
-      new URL(resolutionResult);
+      new URL(resolutionResult, import.meta.url);
     } catch {
       errors.push(
         `Import map key "${specifierKey}" is invalid because` +
